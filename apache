@@ -5,9 +5,9 @@ sudo cp /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecuri
 sudo nano /etc/modsecurity/modsecurity.conf # change  SecRuleEngine DetectionOnly -> SecRuleEngine On
 sudo systemctl restart apache2 #OR service apache2 restart
 wget https://github.com/coreruleset/coreruleset/archive/refs/tags/v3.3.4.zip
-unzip https://github.com/coreruleset/coreruleset/archive/refs/tags/v3.3.4.zip
-mv coreruleset-3.3.0/crs-setup.conf.example /etc/modsecurity/crs-setup.conf
-mv coreruleset-3.3.0/rules/ /etc/modsecurity/
+unzip v3.3.4.zip
+mv coreruleset-3.3.4/crs-setup.conf.example /etc/modsecurity/crs-setup.conf
+mv coreruleset-3.3.4/rules/ /etc/modsecurity/
 nano /etc/apache2/mods-enabled/security2.conf #Add to file IncludeOptional /etc/modsecurity/*.conf Include /etc/modsecurity/rules/*.conf
 sudo systemctl restart apache2 #OR service apache2 restart
 #if apache fails to restart
