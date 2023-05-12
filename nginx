@@ -1,0 +1,38 @@
+apt update
+sudo apt-get install bison build-essential ca-certificates curl dh-autoreconf doxygen \
+  flex gawk git iputils-ping libcurl4-gnutls-dev libexpat1-dev libgeoip-dev liblmdb-dev \
+  libpcre3-dev libpcre++-dev libssl-dev libtool libxml2 libxml2-dev libyajl-dev locales \
+  lua5.3-dev pkg-config wget zlib1g-dev zlibc libxslt libgd-devY
+cd /opt && sudo git clone https://github.com/SpiderLabs/ModSecurity
+cd ModSecurity
+sudo git submodule init
+sudo git submodule update
+sudo ./build.sh
+sudo ./configure
+sudo make
+sudo make install
+cd /opt && sudo git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git
+nginx -v
+cd /opt && sudo wget http://nginx.org/download/nginx-1.14.0.tar.gz #download exact version for nginx
+sudo tar -xvzmf nginx
+cd nginx
+nginx -V #copy arguments
+sudo ./configure <arguments>  --add-dynamic-module=../ModSecurity-nginx
+sudo make modules
+sudo mkdir /etc/nginx/modules
+sudo cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules
+nano /etc/nginx/nginx.conf # add load_module /etc/nginx/modules/ngx_http_modsecurity_module.so;
+sudo rm -rf /usr/share/modsecurity-crs
+sudo git clone https://github.com/coreruleset/coreruleset /usr/local/modsecurity-crs
+sudo mv /usr/local/modsecurity-crs/crs-setup.conf.example /usr/local/modsecurity-crs/crs-setup.conf
+sudo mv /usr/local/modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example /usr/local/modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+sudo mkdir -p /etc/nginx/modsec
+sudo cp /opt/ModSecurity/unicode.mapping /etc/nginx/modsec
+sudo cp /opt/ModSecurity/modsecurity.conf-recommended /etc/nginx/modsec/modsecurity.conf
+sudo cp /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf
+#nano /etc/modsecurity/modsecurity.conf # add SecRuleEngine On
+sudo touch /etc/nginx/modsec/main.conf
+nano /etc/nginx/modsec/main.conf # add Include /etc/nginx/modsec/modsecurity.conf  Include /usr/local/modsecurity-crs/crs-setup.conf  Include /usr/local/modsecurity-crs/rules/*.conf
+nano /etc/nginx/sites-available/default #add modsecurity on; modsecurity_rules_file /etc/nginx/modsec/main.conf;
+sudo systemctl restart nginx
+
