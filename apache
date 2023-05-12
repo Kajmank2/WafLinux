@@ -1,0 +1,19 @@
+sudo apt update -y
+sudo apt install libapache2-mod-security2
+sudo systemctl restart apache2 #OR service apache2 restart
+sudo cp /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf
+sudo nano /etc/modsecurity/modsecurity.conf # change  SecRuleEngine DetectionOnly -> SecRuleEngine On
+sudo systemctl restart apache2 #OR service apache2 restart
+wget https://github.com/coreruleset/coreruleset/archive/refs/tags/v3.3.4.zip
+unzip https://github.com/coreruleset/coreruleset/archive/refs/tags/v3.3.4.zip
+mv coreruleset-3.3.0/crs-setup.conf.example /etc/modsecurity/crs-setup.conf
+mv coreruleset-3.3.0/rules/ /etc/modsecurity/
+nano /etc/apache2/mods-enabled/security2.conf #Add to file IncludeOptional /etc/modsecurity/*.conf Include /etc/modsecurity/rules/*.conf
+sudo systemctl restart apache2 #OR service apache2 restart
+#if apache fails to restart
+nano /etc/apahc2/mods-enabled/security2.conf
+# COMMENT -> IncludeOptional /usr/share/modsecurity-crs/owasp-crs.load
+# BASIC RULE #
+sudo nano /etc/apache2/sites-available/000-default.conf
+#SecRuleEngine On
+#SecRule ARGS:testparam "@contains test" "id:999,deny,status:403,msg:'Test Successful'"
